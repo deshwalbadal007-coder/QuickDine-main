@@ -92,7 +92,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
                     <div className="border-t border-outline-variant/10 my-3"></div>
                     <span className="block text-[9px] font-medium text-black/55 tracking-wider uppercase mb-2">QUICK RESERVATION</span>
                     <div className="flex flex-wrap gap-1.5">
-                        {restaurant.availableSlots
+                        {(restaurant.availableSlots || [])
                             .filter((slot) => {
                                 const [slotHour, slotMinute] = slot.split(":").map(Number);
                                 const now = new Date();
