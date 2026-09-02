@@ -6,7 +6,8 @@ import Footer from "../components/Footer.tsx";
 import RestaurantCard from "../components/RestaurantCard.tsx";
 import AuthModal from "../components/AuthModal.tsx";
 import { SlidersHorizontal, Search as SearchIcon, X, Check, MapPin, SearchXIcon } from "lucide-react";
-import { dummyRestaurant } from "../assets/assets.ts";
+import api from "../lib/api.ts";
+import toast from "react-hot-toast";
 
 export default function Search() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -35,15 +36,35 @@ export default function Search() {
         })();
     }, [searchVal, locationVal]);
 
-    useEffect(() => {
-        const fetchRestaurants = async () => {
-            setRestaurants(dummyRestaurant);
+useEffect(() => {
+    const fetchRestaurants = async () => {
+        try {
+            setLoading(true);
+
+            const res = await api.get(
+                `/restaurants?${searchParams.toString()}`
+            );
+
+            console.log("Restaurants API response:", res.data);
+
+            setRestaurants(res.data?.restaurants || []);
+        } catch (error: any) {
+            console.error("Error fetching restaurants:", error);
+
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to load restaurants"
+            );
+
+            setRestaurants([]);
+        } finally {
             setLoading(false);
-        };
+        }
+    };
 
-        fetchRestaurants();
-    }, [searchParams]);
-
+    fetchRestaurants();
+}, [searchParams]);
     const handleTextSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const nextParams = new URLSearchParams(searchParams);

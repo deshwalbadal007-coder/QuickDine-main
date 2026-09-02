@@ -22,13 +22,16 @@ interface RestaurantCardProps {
 export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
     const navigate = useNavigate();
 
-    const handleSlotClick = (e: React.MouseEvent, slot: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const today = new Date().toISOString().split("T")[0];
-        // Redirect to booking details confirmation with slot and today's date pre-selected
-        navigate(`/booking/${restaurant.slug}?slot=${slot}&date=${today}`);
-    };
+const handleSlotClick = (e: React.MouseEvent, slot: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const today = new Date().toISOString().split("T")[0];
+
+    navigate(
+        `/booking/${restaurant.slug}?slot=${slot}&date=${today}&guests=2`
+    );
+};
 
     return (
         <div className="group relative bg-white border border-outline-variant/10 card-hover-effect overflow-hidden rounded-md flex flex-col h-full">
@@ -92,7 +95,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
                     <div className="border-t border-outline-variant/10 my-3"></div>
                     <span className="block text-[9px] font-medium text-black/55 tracking-wider uppercase mb-2">QUICK RESERVATION</span>
                     <div className="flex flex-wrap gap-1.5">
-                        {restaurant.availableSlots
+                        {(restaurant.availableSlots || [])
                             .filter((slot) => {
                                 const [slotHour, slotMinute] = slot.split(":").map(Number);
                                 const now = new Date();

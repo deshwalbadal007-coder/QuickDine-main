@@ -8,8 +8,7 @@ import RestaurantCard from "../components/RestaurantCard.tsx";
 import AuthModal from "../components/AuthModal.tsx";
 import { CalendarIcon, UsersIcon, ClockIcon, MapPinIcon, CalendarDaysIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { dummyFeaturedRestaurants, dummyMyBookingsData } from "../assets/assets.ts";
-
+import api from "../lib/api.ts";
 export default function Dashboard() {
     const { user } = useAppContext();
 
@@ -18,11 +17,24 @@ export default function Dashboard() {
     const [loadingBookings, setLoadingBookings] = useState(true);
 
     // Fetch user bookings
-    useEffect(() => {
+        useEffect(() => {
         const fetchBookings = async () => {
-            setBookings(dummyMyBookingsData);
-            setLoadingBookings(false);
+            try {
+                setLoadingBookings(true);
+                const res = await api.get("/bookings/my")
+                setBookings(res.data.bookings || [])
+                
+            } catch (error:any) {
+              toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Login failed"
+            ); 
+            }finally{
+                setLoadingBookings(false)
+            }
         };
+
 
         if (user) {
             fetchBookings();
@@ -31,25 +43,50 @@ export default function Dashboard() {
 
     // Fetch generic recommendations
     useEffect(() => {
-        const fetchRecommendations = async () => {
-            setRecommendations(dummyFeaturedRestaurants);
-        };
-        fetchRecommendations();
-    }, []);
-
-    const handleCancelBooking = async (bookingId: string) => {
-        if (!window.confirm("Are you sure you want to cancel this booking?")) {
-            return;
-        }
-
+    const fetchRecommendations = async () => {
         try {
-            setBookings((prev) => prev.map((b) => (b._id === bookingId ? { ...b, status: "cancelled" } : b)));
-            toast.success("Reservation cancelled successfully.");
+            const res = await api.get("/restaurants/featured");
+
+            setRecommendations(res.data.restaurants || []);
+
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || error?.message);
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to load recommendations"
+            );
         }
     };
 
+    fetchRecommendations();
+}, []);
+
+const handleCancelBooking = async (bookingId: string) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+        return;
+    }
+
+    try {
+        await api.delete(`/bookings/${bookingId}`);
+
+        setBookings((prev) =>
+            prev.map((b) =>
+                b._id === bookingId
+                    ? { ...b, status: "cancelled" }
+                    : b
+            )
+        );
+
+        toast.success("Reservation cancelled successfully.");
+    } catch (error: any) {
+        console.error("Cancel booking error:", error);
+
+        toast.error(
+            error?.response?.data?.message ||
+            "Failed to cancel booking"
+        );
+    }
+};
     if (!user) return null;
 
     // Filter bookings into upcoming and past
@@ -77,7 +114,7 @@ export default function Dashboard() {
                     {/* Welcoming header */}
                     <div className="pb-4 border-b border-outline-variant/10">
                         <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary">
-                            Welcome back, {user.name.split(" ")[0]}
+                            Welcome back, {user?.name?.split(" ")?.[0] || "User"}
                         </h2>
                         <p className="text-xs text-black/55 mt-1.5">Manage your upcoming dining experiences.</p>
                     </div>

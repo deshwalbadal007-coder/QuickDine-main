@@ -10,7 +10,7 @@ import Loader from "../components/Loader.tsx";
 import BookingSuccess from "../components/booking/BookingSuccess.tsx";
 import BookingSummary from "../components/booking/BookingSummary.tsx";
 import BookingForm from "../components/booking/BookingForm.tsx";
-import { dummyBookingData, dummyRestaurant } from "../assets/assets.ts";
+import api from "../lib/api.ts";
 
 export default function BookingConfirmation() {
     const { slug } = useParams<{ slug: string }>();
@@ -33,7 +33,7 @@ export default function BookingConfirmation() {
     // From Query Params
     const slot = searchParams.get("slot") || "";
     const date = searchParams.get("date") || "";
-    const guests = searchParams.get("guests") || "2";
+    const guests = Number(searchParams.get("guests")) || 2;
 
     useEffect(() => {
         // Prefill form when user details load
@@ -47,15 +47,31 @@ export default function BookingConfirmation() {
     }, [user]);
 
     useEffect(() => {
-        const fetchRestaurant = async () => {
-            setRestaurant(dummyRestaurant.find((r) => r.slug === slug));
-            setLoading(false);
-        };
+    const fetchRestaurant = async () => {
+        try {
+            setLoading(true);
 
-        if (slug) {
-            fetchRestaurant();
+            const res = await api.get(`/restaurants/${slug}`);
+
+            setRestaurant(res.data.restaurant);
+
+        } catch (error: any) {
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to load restaurant"
+            );
+
+            navigate("/");
+        } finally {
+            setLoading(false);
         }
-    }, [slug, navigate]);
+    };
+
+    if (slug) {
+        fetchRestaurant();
+    }
+}, [slug, navigate]);
 
     if (loading) {
         return <Loader text="Retrieving Dining Details..." />;
@@ -73,7 +89,9 @@ export default function BookingConfirmation() {
 
         try {
             setConfirming(true);
-            setConfirmedBooking(dummyBookingData);
+            
+const res = await api.post('/bookings',{restaurantId:restaurant._id,date,time:slot,guests,occasion,specialRequests})
+setConfirmedBooking(res.data)
             toast.success("Reservation confirmed!");
         } catch (error: any) {
             toast.error(error?.response?.data?.message || error?.message);

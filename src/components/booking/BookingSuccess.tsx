@@ -7,7 +7,7 @@ interface BookingSuccessProps {
     restaurant: any;
     date: string;
     slot: string;
-    guests: string;
+    guests: number;
 }
 
 export default function BookingSuccess({ confirmedBooking, restaurant, date, slot, guests }: BookingSuccessProps) {
