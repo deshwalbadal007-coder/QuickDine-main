@@ -26,7 +26,7 @@ export const registeruser = async (
     res: Response
 ): Promise<void> => {
     try {
-        const { name, email, password, phone } = req.body;
+        const { name, email, password, phone, role } = req.body;
 
         if (!name || !email || !password) {
             res.status(400).json({
@@ -55,7 +55,7 @@ export const registeruser = async (
             email: email.toLowerCase().trim(),
             password: hashedPassword,
             phone,
-            role: "user",
+            role: role === "owner" ? "owner" : "user",
         });
 
         const token = generateToken(newUser._id.toString());
@@ -65,7 +65,7 @@ export const registeruser = async (
             message: "User registered successfully",
             token,
             user: {
-               _id: newUser._id.toString(),
+                _id: newUser._id.toString(),
                 name: newUser.name,
                 email: newUser.email,
                 phone: newUser.phone,
@@ -81,7 +81,6 @@ export const registeruser = async (
         });
     }
 };
-
 // =========================
 // Login User
 // =========================
