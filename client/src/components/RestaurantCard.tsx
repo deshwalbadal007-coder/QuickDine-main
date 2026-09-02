@@ -91,17 +91,33 @@ const handleSlotClick = (e: React.MouseEvent, slot: string) => {
                 </div>
 
                 {/* Quick Slots */}
+                {/* Quick Slots */}
                 <div>
                     <div className="border-t border-outline-variant/10 my-3"></div>
-                    <span className="block text-[9px] font-medium text-black/55 tracking-wider uppercase mb-2">QUICK RESERVATION</span>
+
+                    <span className="block text-[9px] font-medium text-black/55 tracking-wider uppercase mb-2">
+                        QUICK RESERVATION
+                    </span>
+
                     <div className="flex flex-wrap gap-1.5">
-                        {(restaurant.availableSlots || [])
+                        {restaurant.availableSlots
+                            .flatMap((slot) => slot.split(","))
+                            .map((slot) => slot.trim())
+                            .filter(Boolean)
                             .filter((slot) => {
-                                const [slotHour, slotMinute] = slot.split(":").map(Number);
+                                const [slotHour, slotMinute] = slot
+                                    .split(":")
+                                    .map(Number);
+
                                 const now = new Date();
                                 const currentHour = now.getHours();
                                 const currentMinute = now.getMinutes();
-                                return slotHour > currentHour || (slotHour === currentHour && slotMinute > currentMinute);
+
+                                return (
+                                    slotHour > currentHour ||
+                                    (slotHour === currentHour &&
+                                        slotMinute > currentMinute)
+                                );
                             })
                             .slice(0, 3)
                             .map((slot) => (
@@ -113,6 +129,7 @@ const handleSlotClick = (e: React.MouseEvent, slot: string) => {
                                     {slot}
                                 </button>
                             ))}
+
                         <Link
                             to={`/restaurant/${restaurant.slug}`}
                             className="text-[10px] font-medium border border-outline-variant/20 px-3 py-1.5 transition-colors cursor-pointer text-secondary hover:bg-secondary hover:text-white"
