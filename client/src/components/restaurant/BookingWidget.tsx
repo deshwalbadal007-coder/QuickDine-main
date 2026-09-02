@@ -83,37 +83,46 @@ export default function BookingWidget({
         ) : (
             (() => {
                 // Get slots from API or restaurant
-                const rawSlots =
-                    slotsAvailability?.length > 0
-                        ? slotsAvailability
-                        : restaurant?.availableSlots || [];
+               // Get slots from API or restaurant
+const rawSlots =
+    slotsAvailability?.length > 0
+        ? slotsAvailability
+        : restaurant?.availableSlots || [];
 
-                // Normalize both possible formats:
-                // "19:00"
-                // OR
-                // { time: "19:00", availableSeats: 20, isAvailable: true }
-                const allSlots = rawSlots
-                    .map((slotInfo: any) => {
-                        if (typeof slotInfo === "string") {
-                            return {
-                                time: slotInfo,
-                                availableSeats: restaurant?.totalSeats || 20,
-                                isAvailable: true,
-                            };
-                        }
+// Normalize comma-separated strings and array formats
+const normalizedSlots = Array.isArray(rawSlots)
+    ? rawSlots.flatMap((slotInfo: any) =>
+          typeof slotInfo === "string"
+              ? slotInfo.split(",")
+              : [slotInfo]
+      )
+    : String(rawSlots)
+          .split(",")
+          .map((slot) => slot.trim())
+          .filter(Boolean);
 
-                        return {
-                            time: slotInfo.time,
-                            availableSeats:
-                                slotInfo.availableSeats ??
-                                restaurant?.totalSeats ??
-                                20,
-                            isAvailable:
-                                slotInfo.isAvailable !== false,
-                        };
-                    })
-                    .filter((slotInfo: any) => slotInfo.time);
+// Normalize into a consistent slot object
+const allSlots = normalizedSlots
+    .map((slotInfo: any) => {
+        if (typeof slotInfo === "string") {
+            return {
+                time: slotInfo.trim(),
+                availableSeats: restaurant?.totalSeats || 20,
+                isAvailable: true,
+            };
+        }
 
+        return {
+            time: slotInfo.time,
+            availableSeats:
+                slotInfo.availableSeats ??
+                restaurant?.totalSeats ??
+                20,
+            isAvailable:
+                slotInfo.isAvailable !== false,
+        };
+    })
+    .filter((slotInfo: any) => slotInfo.time);
                 // Remove past slots if selected date is today
                 const todayStr = new Date()
                     .toISOString()

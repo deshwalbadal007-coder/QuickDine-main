@@ -90,7 +90,7 @@ const handleSlotClick = (e: React.MouseEvent, slot: string) => {
                     </p>
                 </div>
 
-                {/* Quick Slots */}
+
                 {/* Quick Slots */}
                 <div>
                     <div className="border-t border-outline-variant/10 my-3"></div>

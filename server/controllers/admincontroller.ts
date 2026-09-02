@@ -42,36 +42,52 @@ res.status(400).json({error});
 
  }
 
- export const getAdminStats = async (req : AuthRequest, res: Response):Promise<void>=>{
-try{
-const totalUsers = await user.countDocuments({role:"user"});
-const totalOwner = await user.countDocuments({role:"owner"});
-const totalbokings = await booking.countDocuments({});
-const totalRestaurant = await Restaurant.countDocuments({})
+export const getAdminStats = async (
+    req: AuthRequest,
+    res: Response
+): Promise<void> => {
+    try {
+        const totalUsers = await user.countDocuments({
+            role: "user",
+        });
 
-const latestBookings = await booking.find({}).populate("user","name email").
-populate("restaurant","name").sort({createdAt: -1}).limit(10)
+        const totalOwners = await user.countDocuments({
+            role: "owner",
+        });
 
-res.json({
-    users:{
-        totalUsers,
-        totalOwner,
-        total:totalUsers + totalOwner,
-    },
-    restaurants:{
-        total:totalRestaurant,
-    },
-    booking:{
-        total:totalbokings,
-    },
-    latestBookings
-})
+        const totalBookings = await booking.countDocuments({});
 
-}catch(error:any)
-{
-console.error(error);
-res.status(400).json({message:error.message});
+        const totalRestaurants = await Restaurant.countDocuments({});
 
-}
+        const latestBookings = await booking
+            .find({})
+            .populate("user", "name email")
+            .populate("restaurant", "name")
+            .sort({ createdAt: -1 })
+            .limit(10);
 
- }
+        res.json({
+            users: {
+                totalUsers,
+                totalOwners,
+                total: totalUsers + totalOwners,
+            },
+
+            restaurants: {
+                total: totalRestaurants,
+            },
+
+            bookings: {
+                total: totalBookings,
+            },
+
+            latestBookings,
+        });
+    } catch (error: any) {
+        console.error("Error fetching admin stats:", error);
+
+        res.status(400).json({
+            message: error.message,
+        });
+    }
+};
