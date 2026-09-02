@@ -51,7 +51,7 @@ const UserSchema = new Schema<IUser>(
 
 // Don't send password in API responses
 UserSchema.set("toJSON", {
-    transform: (_doc, ret) => {
+    transform: (_doc, ret: Partial<IUser>) => {
         delete ret.password;
         return ret;
     },
