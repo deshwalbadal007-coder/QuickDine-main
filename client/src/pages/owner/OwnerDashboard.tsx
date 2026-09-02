@@ -3,7 +3,7 @@ import { useAppContext } from "../../context/AppContext.tsx";
 import Navbar from "../../components/Navbar.tsx";
 import Footer from "../../components/Footer.tsx";
 import Loader from "../../components/Loader.tsx";
-import { CalendarIcon, SettingsIcon } from "lucide-react";
+import { CalendarIcon, SettingsIcon, PlusIcon } from "lucide-react";
 
 import RestaurantWizard from "../../components/owner/RestaurantWizard.tsx";
 import PendingApproval from "../../components/owner/PendingApproval.tsx";
@@ -20,58 +20,55 @@ export default function OwnerDashboard() {
     const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState<
-        "bookings" | "details"
+        "bookings" | "details" | "register"
     >("bookings");
 
     // =========================
     // FETCH OWNER DATA
     // =========================
     const fetchOwnerData = async () => {
-    try {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        const res = await api.get("/owner/restaurant");
+            const res = await api.get("/owner/restaurant");
 
-        console.log("OWNER RESTAURANT API:", res.data);
+            console.log("OWNER RESTAURANT API:", res.data);
 
-        const responseData =
-            res.data?.restaurant || res.data?.data || res.data;
+            const responseData =
+                res.data?.restaurant ||
+                res.data?.data ||
+                res.data;
 
-        const restaurantData = Array.isArray(responseData)
-            ? responseData[0] || null
-            : responseData || null;
+            const restaurantData = Array.isArray(responseData)
+                ? responseData[0] || null
+                : responseData || null;
 
-        console.log("RESTAURANT DATA:", restaurantData);
+            console.log("RESTAURANT DATA:", restaurantData);
 
-        // If no restaurant exists
-        if (!restaurantData) {
-            setRestaurant(null);
-            setBookings([]);
-            return;
-        }
+            // =========================
+            // NO RESTAURANT
+            // =========================
+            if (!restaurantData) {
+                setRestaurant(null);
+                setBookings([]);
+                return;
+            }
 
-        setRestaurant(restaurantData);
+            setRestaurant(restaurantData);
+
             // =========================
             // FETCH BOOKINGS ONLY IF APPROVED
             // =========================
             if (restaurantData.status === "approved") {
                 try {
-                    const bookingsRes = await api.get("/owner/bookings");
+                    const bookingsRes =
+                        await api.get("/owner/bookings");
 
                     console.log(
                         "OWNER BOOKINGS API:",
                         bookingsRes.data
                     );
 
-                    /*
-                     * Handles:
-                     *
-                     * [booking1, booking2]
-                     *
-                     * OR
-                     *
-                     * { bookings: [...] }
-                     */
                     const bookingData =
                         Array.isArray(bookingsRes.data)
                             ? bookingsRes.data
@@ -184,7 +181,10 @@ export default function OwnerDashboard() {
                 ========================= */}
                 {!restaurant ? (
                     <RestaurantWizard
-                        setRestaurant={setRestaurant}
+                        setRestaurant={(newRestaurant) => {
+                            setRestaurant(newRestaurant);
+                            setActiveTab("details");
+                        }}
                     />
 
                 ) : restaurantStatus === "pending" ? (
@@ -237,9 +237,12 @@ export default function OwnerDashboard() {
                                 </div>
                             </div>
 
-                            {/* Navigation */}
+                            {/* =========================
+                                NAVIGATION
+                            ========================= */}
                             <nav className="flex flex-col gap-1.5">
 
+                                {/* BOOKINGS */}
                                 <button
                                     onClick={() =>
                                         setActiveTab("bookings")
@@ -255,6 +258,7 @@ export default function OwnerDashboard() {
                                     Bookings ({bookings.length})
                                 </button>
 
+                                {/* PROFILE DETAILS */}
                                 <button
                                     onClick={() =>
                                         setActiveTab("details")
@@ -268,6 +272,22 @@ export default function OwnerDashboard() {
                                     <SettingsIcon size={14} />
 
                                     Profile Details
+                                </button>
+
+                                {/* REGISTER NEW RESTAURANT */}
+                                <button
+                                    onClick={() =>
+                                        setActiveTab("register")
+                                    }
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-medium tracking-wider uppercase text-left rounded-sm cursor-pointer transition-colors ${
+                                        activeTab === "register"
+                                            ? "bg-primary text-white"
+                                            : "text-black/55 hover:bg-surface"
+                                    }`}
+                                >
+                                    <PlusIcon size={14} />
+
+                                    Register New Restaurant
                                 </button>
 
                             </nav>
@@ -292,6 +312,16 @@ export default function OwnerDashboard() {
                                 <OwnerProfileDetails
                                     restaurant={restaurant}
                                     setRestaurant={setRestaurant}
+                                />
+                            )}
+
+                            {/* REGISTER NEW RESTAURANT */}
+                            {activeTab === "register" && (
+                                <RestaurantWizard
+                                    setRestaurant={(newRestaurant) => {
+                                        setRestaurant(newRestaurant);
+                                        setActiveTab("details");
+                                    }}
                                 />
                             )}
 
