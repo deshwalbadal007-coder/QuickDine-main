@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import api from "../lib/api.js";
 
 interface UserType {
-    _id: string;
+    id: string;
     name: string;
     email: string;
     phone?: string;
@@ -51,8 +51,9 @@ export const AppContextProvider = ({ children }: Props) => {
     const [isAuthModalOpen, setAuthModalOpen] =
         useState<boolean>(false);
 
-
+    // =========================
     // LOGIN
+    // =========================
     const login = async (
         email: string,
         password: string
@@ -65,10 +66,8 @@ export const AppContextProvider = ({ children }: Props) => {
                 password,
             });
 
-            const {
-                token: userToken,
-                ...userData
-            } = res.data;
+            const userToken = res.data.token;
+            const userData = res.data.user;
 
             localStorage.setItem("token", userToken);
 
@@ -78,7 +77,6 @@ export const AppContextProvider = ({ children }: Props) => {
             toast.success(`Welcome back, ${userData.name}!`);
 
             return true;
-
         } catch (error: any) {
             toast.error(
                 error?.response?.data?.message ||
@@ -87,14 +85,14 @@ export const AppContextProvider = ({ children }: Props) => {
             );
 
             return false;
-
         } finally {
             setLoading(false);
         }
     };
 
-
+    // =========================
     // REGISTER
+    // =========================
     const register = async (
         name: string,
         email: string,
@@ -113,10 +111,8 @@ export const AppContextProvider = ({ children }: Props) => {
                 role,
             });
 
-            const {
-                token: userToken,
-                ...userData
-            } = res.data;
+            const userToken = res.data.token;
+            const userData = res.data.user;
 
             localStorage.setItem("token", userToken);
 
@@ -126,7 +122,6 @@ export const AppContextProvider = ({ children }: Props) => {
             toast.success("Welcome to QuickDine Club!");
 
             return true;
-
         } catch (error: any) {
             toast.error(
                 error?.response?.data?.message ||
@@ -135,14 +130,14 @@ export const AppContextProvider = ({ children }: Props) => {
             );
 
             return false;
-
         } finally {
             setLoading(false);
         }
     };
 
-
+    // =========================
     // LOGOUT
+    // =========================
     const logout = () => {
         localStorage.removeItem("token");
 
@@ -152,11 +147,11 @@ export const AppContextProvider = ({ children }: Props) => {
         window.location.href = "/";
     };
 
-
-    // LOAD USER
+    // =========================
+    // LOAD CURRENT USER
+    // =========================
     useEffect(() => {
         const loadUser = async () => {
-
             if (!token) {
                 setLoading(false);
                 return;
@@ -165,28 +160,25 @@ export const AppContextProvider = ({ children }: Props) => {
             try {
                 const res = await api.get("/auth/me");
 
-                setUser(res.data);
+                console.log("Current user:", res.data.user);
 
+                setUser(res.data.user);
             } catch (error: any) {
-                toast.error(
-                    error?.response?.data?.message ||
-                    error?.message ||
-                    "Session expired"
+                console.error(
+                    "Load user error:",
+                    error?.response?.data || error
                 );
 
                 localStorage.removeItem("token");
                 setToken(null);
                 setUser(null);
-
             } finally {
                 setLoading(false);
             }
         };
 
         loadUser();
-
     }, [token]);
-
 
     const value: AppContextType = {
         user,
@@ -200,14 +192,12 @@ export const AppContextProvider = ({ children }: Props) => {
         logout,
     };
 
-
     return (
         <AppContext.Provider value={value}>
             {children}
         </AppContext.Provider>
     );
 };
-
 
 export const useAppContext = () => {
     const context = useContext(AppContext);

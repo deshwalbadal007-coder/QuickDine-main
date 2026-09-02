@@ -43,21 +43,23 @@ export default function Dashboard() {
 
     // Fetch generic recommendations
     useEffect(() => {
-        const fetchRecommendations = async () => {
-            try {
-                const res = await api.get("/restaurants/featured")
-                setRecommendations(res.data)
-                
-            } catch (error:any) {
-              toast.error(
+    const fetchRecommendations = async () => {
+        try {
+            const res = await api.get("/restaurants/featured");
+
+            setRecommendations(res.data.restaurants || []);
+
+        } catch (error: any) {
+            toast.error(
                 error?.response?.data?.message ||
                 error?.message ||
-                "Login failed"
-            ); 
-            }
-        };
-        fetchRecommendations();
-    }, []);
+                "Failed to load recommendations"
+            );
+        }
+    };
+
+    fetchRecommendations();
+}, []);
 
 const handleCancelBooking = async (bookingId: string) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) {

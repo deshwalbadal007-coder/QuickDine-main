@@ -33,7 +33,7 @@ export default function BookingConfirmation() {
     // From Query Params
     const slot = searchParams.get("slot") || "";
     const date = searchParams.get("date") || "";
-    const guests = searchParams.get("guests") || "2";
+    const guests = Number(searchParams.get("guests")) || 2;
 
     useEffect(() => {
         // Prefill form when user details load
@@ -47,27 +47,31 @@ export default function BookingConfirmation() {
     }, [user]);
 
     useEffect(() => {
-        const fetchRestaurant = async () => {
-            try {
-                setLoading(true);
-                const res = await api.get('/restaurants/${slug}')
-                setRestaurant(res.data)
-                } catch (error:any) {
-                toast.error(
+    const fetchRestaurant = async () => {
+        try {
+            setLoading(true);
+
+            const res = await api.get(`/restaurants/${slug}`);
+
+            setRestaurant(res.data.restaurant);
+
+        } catch (error: any) {
+            toast.error(
                 error?.response?.data?.message ||
                 error?.message ||
-                "Login failed"
-            ); 
-            navigate("/")
-            }finally{
-                setLoading(false)
-            }
-        };
+                "Failed to load restaurant"
+            );
 
-        if (slug) {
-            fetchRestaurant();
+            navigate("/");
+        } finally {
+            setLoading(false);
         }
-    }, [slug, navigate]);
+    };
+
+    if (slug) {
+        fetchRestaurant();
+    }
+}, [slug, navigate]);
 
     if (loading) {
         return <Loader text="Retrieving Dining Details..." />;

@@ -45,7 +45,7 @@ export default function RestaurantDetail() {
 
                 const res = await api.get(`/restaurants/${slug}`);
 
-                setRestaurant(res.data);
+                setRestaurant(res.data.restaurant);
 
                 const today = new Date()
                     .toISOString()

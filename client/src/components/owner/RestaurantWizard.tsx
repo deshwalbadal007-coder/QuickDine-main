@@ -90,7 +90,7 @@ export default function RestaurantWizard({ setRestaurant }: RestaurantWizardProp
                     "Content-Type": "multipart/form-data"
                 }
             });
-            setRestaurant(res.data);
+            setRestaurant(res.data.restaurant);
 
             toast.success("Restaurant profile submitted successfully! Awaiting Admin approval.");
         } catch (error: any) {

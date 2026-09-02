@@ -65,7 +65,7 @@ export const registeruser = async (
             message: "User registered successfully",
             token,
             user: {
-                id: newUser._id,
+               _id: newUser._id.toString(),
                 name: newUser.name,
                 email: newUser.email,
                 phone: newUser.phone,
@@ -132,7 +132,7 @@ export const loginuser = async (
             message: "Login successful",
             token,
             user: {
-                id: existingUser._id,
+                _id: existingUser._id.toString(),
                 name: existingUser.name,
                 email: existingUser.email,
                 phone: existingUser.phone,

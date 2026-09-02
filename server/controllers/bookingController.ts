@@ -32,7 +32,7 @@ export const createBooking = async (
         if (!restaurantId || !date || !time || !guests) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide restaurantId, date, time and guests",
+                message: "Please provide restaurant_Id, date, time and guests",
             });
         }
 
@@ -108,17 +108,17 @@ export const createBooking = async (
         }
 
         // Create booking
-        const newBooking = await booking.create({
-            user: req.user._id,
-            restaurant: restaurantId,
-            date: bookingDate,
-            time,
-            guests: requestedGuests,
-            occasion,
-            specialRequests,
-            status: "confirmed",
-        });
-
+      const newBooking = await booking.create({
+    bookingId: `BK-${Date.now()}`,
+    user: req.user._id,
+    restaurant: restaurantId,
+    date: bookingDate,
+    time,
+    guests: requestedGuests,
+    occasion,
+    specialRequests,
+    status: "confirmed",
+});
         // Populate restaurant information
         const populatedBooking = await newBooking.populate(
             "restaurant",

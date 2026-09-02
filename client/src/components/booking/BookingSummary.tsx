@@ -5,7 +5,7 @@ interface BookingSummaryProps {
     restaurant: any;
     date: string;
     slot: string;
-    guests: string;
+    guests: number;
 }
 
 export default function BookingSummary({ restaurant, date, slot, guests }: BookingSummaryProps) {
