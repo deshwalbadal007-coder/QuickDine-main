@@ -10,7 +10,6 @@ import PendingApproval from "../../components/owner/PendingApproval.tsx";
 import RequestRejected from "../../components/owner/RequestRejected.tsx";
 import OwnerBookings from "../../components/owner/OwnerBookings.tsx";
 import OwnerProfileDetails from "../../components/owner/OwnerProfileDetails.tsx";
-
 import api from "../../lib/api.ts";
 
 export default function OwnerDashboard() {
@@ -28,40 +27,30 @@ export default function OwnerDashboard() {
     // FETCH OWNER DATA
     // =========================
     const fetchOwnerData = async () => {
-        try {
-            setLoading(true);
+    try {
+        setLoading(true);
 
-            const res = await api.get("/owner/restaurant");
+        const res = await api.get("/owner/restaurant");
 
-            console.log("OWNER RESTAURANT API:", res.data);
+        console.log("OWNER RESTAURANT API:", res.data);
 
-            /*
-             * Handles both possible API responses:
-             *
-             * { restaurant: {...} }
-             *
-             * OR
-             *
-             * {...restaurant data...}
-             */
-            const restaurantData =
-                res.data?.restaurant || res.data?.data || res.data;
+        const responseData =
+            res.data?.restaurant || res.data?.data || res.data;
 
-            console.log("RESTAURANT DATA:", restaurantData);
+        const restaurantData = Array.isArray(responseData)
+            ? responseData[0] || null
+            : responseData || null;
 
-            // If no restaurant exists
-            if (
-                !restaurantData ||
-                restaurantData === null ||
-                restaurantData === undefined
-            ) {
-                setRestaurant(null);
-                setBookings([]);
-                return;
-            }
+        console.log("RESTAURANT DATA:", restaurantData);
 
-            setRestaurant(restaurantData);
+        // If no restaurant exists
+        if (!restaurantData) {
+            setRestaurant(null);
+            setBookings([]);
+            return;
+        }
 
+        setRestaurant(restaurantData);
             // =========================
             // FETCH BOOKINGS ONLY IF APPROVED
             // =========================
