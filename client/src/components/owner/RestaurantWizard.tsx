@@ -79,13 +79,13 @@ export default function RestaurantWizard({ setRestaurant }: RestaurantWizardProp
             formData.append("address", address);
             formData.append("chef", chef);
             formData.append("tags", tags);
-            formData.append("availableSlots", JSON.stringify(availableSlots));
+            formData.append("availableSlots", availableSlots.join(","));
             formData.append("totalSeats", totalSeats);
             if (imageFile) {
                 formData.append("image", imageFile);
             }
 
-            const res = await api.post("/owner/restaurants", formData, {
+            const res = await api.post("/owner/restaurant", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
